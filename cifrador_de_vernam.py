@@ -1,6 +1,8 @@
 import unicodedata
-alfabeto = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-chaveAleatoria = 'Ik2zwqj'
+import sys
+
+alfabeto = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+
 def remover_acentos(letras):
     letras_sem_acentos = []
     for letra in letras:
@@ -18,24 +20,28 @@ def ler_letras(texto):
     for letra in texto:
         letras.append(letra)
     return letras
+def ler_chave_cripto(chave):
+    chave = []
+    for letra in texto:
+        chave.append(letra)
+    return chave
 
 def cifrar_vernam(letras):
     letras_cifradas = []
-    for letra in letras:
-        if letra in alfabeto:
-            indice = alfabeto.index(letra)
-            chave = alfabeto.index(chaveAleatoria[letras.index(letra)])
+    for i in range (0,len(letras)):
+        if letras[i] in alfabeto:
+            indice = alfabeto.index(letras[i])
+            chave = alfabeto.index(chave_cripto[i])
             novo_indice = (indice + chave) % len(alfabeto)
             letras_cifradas.append(alfabeto[novo_indice])
     return letras_cifradas
 
 def decifrar_vernam(letras):
     letras_decifradas = []
-    for letra in letras:
-        if letra in alfabeto:
-            indice = alfabeto.index(letra)
-            print(letras.index(letra))
-            chave = alfabeto.index(chaveAleatoria[letras.index(letra)])
+    for i in range(0,len(letras)):
+        if letras[i] in alfabeto:
+            indice = alfabeto.index(letras[i])
+            chave = alfabeto.index(chave_cripto[i])
             novo_indice = (indice - chave) % len(alfabeto)
             letras_decifradas.append(alfabeto[novo_indice])
     return letras_decifradas
@@ -44,20 +50,32 @@ def salvar_letras(letras, caminho_arquivo):
     with open(caminho_arquivo, 'w', encoding='utf-8') as arquivo:
         arquivo.write(''.join(letras))
 
-caminho_arquivo = 'texto-decifrado-vernam.txt'
+
+
+print("Insira a chave no formato: vernam -c : cifrar -d : decifrar chave.dat < texto_entrada.txt > texto_saida.txt exemplo:\n  vernam -c chave.dat < texto_aberto.txt > texto_saida.txt")
+entrada = input().strip().split()
+if  entrada[0] != 'vernam' or entrada[1] not in ['-c', '-d'] or entrada[3] != '<' or entrada[5] != '>':
+    print("Entrada inválida. Por favor, siga o formato especificado.")
+    sys.exit(1)
+
+modo = entrada[1]
+caminho_chave = entrada[2]
+caminho_arquivo = entrada[4]
+caminho_saida = entrada[6]
+
 with open(caminho_arquivo, 'r', encoding='utf-8') as arquivo:
     texto = arquivo.read()
-
 letras = ler_letras(texto)
+
+with open(caminho_chave, 'r', encoding='utf-8') as arquivo:
+    texto = arquivo.read()
+chave_cripto = ler_chave_cripto(texto)
 letras = remover_acentos(letras)
 letras = remover_nao_alfabeto(letras)
-print(len(letras))
-print(len(alfabeto))
-print(len(chaveAleatoria))
-#letras = cifrar_vernam(letras)
-letras = decifrar_vernam(letras)
-print(len(letras))
-print(len(alfabeto))
-print(len(chaveAleatoria))
-salvar_letras(letras, 'texto-decifrado-vernam.txt')
-#62
+
+if modo == '-c':
+    letras = cifrar_vernam(letras)
+elif modo == '-d':
+    letras = decifrar_vernam(letras)
+
+salvar_letras(letras, caminho_saida)
